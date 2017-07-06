@@ -1,0 +1,26 @@
+{
+  "name": "ckt",
+  "version": "0.0.1",
+  "description": "VHDL-inspired toolkit for visual-textual programming",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexander-matsievsky/ckt.git"
+  },
+  "author": "Alexander Matsievsky <alexander.matsievsky@gmx.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alexander-matsievsky/ckt/issues"
+  },
+  "homepage": "https://github.com/alexander-matsievsky/ckt#readme",
+  "devDependencies": {
+    "@types/node": "^8.0.8",
+    "typescript": "^2.4.1"
+  }
+}

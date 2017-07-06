@@ -1,0 +1,268 @@
+architecture:
+  persistence:
+    class: typescript
+    of: '#/entity/persistence'
+    package: ./persistence
+  resource:
+    class: typescript
+    of: '#/entity/resource'
+    package: ./resource
+  todo:
+    class: structure
+    of: '#/entity/todo'
+    signal:
+      delete: null
+      get: null
+      post: null
+      put: null
+      restore: null
+      store: null
+    structure:
+      persistence:
+        component: '#/entity/persistence'
+        port-map:
+          - port: '#/entity/persistence/port/in/store'
+            signal: '#/architecture/todo/signal/store'
+          - port: '#/entity/persistence/port/out/restore'
+            signal: '#/architecture/todo/signal/restore'
+      resource:
+        component: '#/entity/resource'
+        port-map:
+          - port: '#/entity/resource/port/in/delete'
+            signal: '#/architecture/todo/signal/delete'
+          - port: '#/entity/resource/port/in/post'
+            signal: '#/architecture/todo/signal/post'
+          - port: '#/entity/resource/port/in/put'
+            signal: '#/architecture/todo/signal/put'
+          - port: '#/entity/resource/port/in/restore'
+            signal: '#/architecture/todo/signal/restore'
+          - port: '#/entity/resource/port/out/get'
+            signal: '#/architecture/todo/signal/get'
+          - port: '#/entity/resource/port/out/store'
+            signal: '#/architecture/todo/signal/store'
+      widget:
+        component: '#/entity/widget'
+        port-map:
+          - port: '#/entity/widget/port/in/get'
+            signal: '#/architecture/todo/signal/get'
+          - port: '#/entity/widget/port/out/delete'
+            signal: '#/architecture/todo/signal/delete'
+          - port: '#/entity/widget/port/out/post'
+            signal: '#/architecture/todo/signal/post'
+          - port: '#/entity/widget/port/out/put'
+            signal: '#/architecture/todo/signal/put'
+  widget:
+    class: typescript
+    of: '#/entity/widget'
+    package: ./widget
+entity:
+  persistence:
+    description: |
+      * stores todo-list updates;
+      * restores todo-list between sessions through \`localStorage\`.
+    port:
+      in:
+        store:
+          description: |
+            A todo-list to store in a `localStorage`.
+          title: Todo-list to store in a `localStorage`
+          type: '#/type/Todos'
+      out:
+        restore:
+          description: |
+            A todo-list restored from a `localStorage`.
+          title: Todo-list restored from a `localStorage`
+          type: '#/type/Todos'
+    title: Todo persister
+  resource:
+    description: >
+      * restores todo-list from \`restore\`;
+
+      * accepts, validates, incorporates todo-list \`POST\` updates;
+
+      * accepts, validates, incorporates todo-list \`PUT\` updates;
+
+      * accepts, validates, incorporates todo-list \`DELETE\` updates;
+
+      * aggregates todo-list \`POST\`, \`PUT\`, \`DELETE\` updates and tracks
+      the current state with \`GET\`.
+    port:
+      in:
+        delete:
+          description: |
+            Deletes an existing todo, which *MUST* exist in the todo-list.
+          title: Todo-list `DELETE` update
+          type: '#/type/Todo.delete'
+        post:
+          description: |
+            Creates a new todo.
+          title: Todo-list `POST` update
+          type: '#/type/Todo.post'
+        put:
+          description: |
+            Updates an existing todo, which *MUST* exist in the todo-list.
+          title: Todo-list `PUT` update
+          type: '#/type/Todo'
+        restore:
+          description: |
+            An initial todo-list at the start-up time
+          title: Initial todo-list at the start-up time
+          type: '#/type/Todo'
+      out:
+        delete:
+          description: |
+            A deleted todo-list item with full info.
+          title: Todo `DELETE`r
+          type: '#/type/Todo'
+        get:
+          description: |
+            A currently actual full todo-list with full info.
+          title: Todo `GET`ter
+          type: '#/type/Todos'
+        post:
+          description: |
+            A newly created todo-list item with full info.
+          title: Todo `POST`er
+          type: '#/type/Todo'
+        put:
+          description: |
+            An updated todo-list item with full info.
+          title: Todo `PUT`ter
+          type: '#/type/Todo'
+    title: Todo-list REST-like resource
+  todo:
+    description: |
+      Simple locally stored todo-list.
+    title: Todo application
+  widget:
+    description: >
+      The widget implements the required
+      [Functionality](https://github.com/tastejs/todomvc/blob/master/app-spec.md#functionality)
+    port:
+      in:
+        delete:
+          description: |
+            A deleted todo-list item with full info.
+          title: Todo `DELETE`r
+          type: '#/type/Todo'
+        get:
+          description: |
+            A currently actual full todo-list with full info.
+          title: Todo `GET`ter
+          type: '#/type/Todos'
+        post:
+          description: |
+            A newly created todo-list item with full info.
+          title: Todo `POST`er
+          type: '#/type/Todo'
+        put:
+          description: |
+            An updated todo-list item with full info.
+          title: Todo `PUT`ter
+          type: '#/type/Todo'
+      out:
+        delete:
+          description: |
+            Deletes an existing todo.
+          title: Todo-list `DELETE` update
+          type: '#/type/Todo.delete'
+        editing:
+          description: >
+            Denotes which todo (by \`id\`) is in the editing process in which
+            \`phaze\`.
+          title: Todo-list item's editing process
+          type: '#/type/Editing'
+        filtered:
+          description: |
+            Denotes which todos to \`show\` or \`hide\` in the todo-list.
+          title: Todo-list items' visibility
+          type: '#/type/Visibility'
+        post:
+          description: |
+            Creates a new todo.
+          title: Todo-list `POST` update
+          type: '#/type/Todo.post'
+        put:
+          description: |
+            Updates an existing todo.
+          title: Todo-list `PUT` update
+          type: '#/type/Todo'
+        tab:
+          description: |
+            Denotes the currently active filter tab.
+          title: Todo-list selected filter-tab
+          type: '#/type/Tab'
+    title: Todo widget
+type:
+  Editing:
+    additionalProperties: false
+    properties:
+      id:
+        format: uuid
+        type: string
+      phaze:
+        enum:
+          - START
+          - STOP
+    required:
+      - id
+      - phaze
+    type: object
+  Tab:
+    enum:
+      - ALL
+      - ACTIVE
+      - COMPLETED
+  Todo:
+    additionalProperties: false
+    properties:
+      completed:
+        type: boolean
+      id:
+        format: uuid
+        type: string
+      title:
+        type: string
+    required:
+      - completed
+      - id
+      - title
+    type: object
+  Todo.delete:
+    additionalProperties: false
+    properties:
+      id:
+        format: uuid
+        type: string
+    required:
+      - id
+    type: object
+  Todo.post:
+    additionalProperties: false
+    properties:
+      title:
+        type: string
+    required:
+      - title
+    type: object
+  Todos:
+    items:
+      $ref: '#/type/Todo'
+    type: array
+  Visibility:
+    additionalProperties: false
+    properties:
+      hide:
+        items:
+          format: uuid
+          type: string
+        type: array
+      show:
+        items:
+          format: uuid
+          type: string
+        type: array
+    required:
+      - hide
+      - show
+    type: object
